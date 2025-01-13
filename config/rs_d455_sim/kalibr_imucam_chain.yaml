@@ -1,0 +1,41 @@
+%YAML:1.0
+
+# Name: static / dynamic calib
+
+cam0:
+  T_cam_imu:
+    - [1.0, 0.0, 0.0, 0.035]
+    - [0.0, 1.0, 0.0, 0.0]
+    - [0.0, 0.0, 1.0, 0.0]
+    - [0.0, 0.0, 0.0, 1.0]
+
+
+  cam_overlaps: [1]
+  camera_model: pinhole
+  distortion_coeffs: [0.0, 0.0, 0.0, 0.0]
+  distortion_model: radtan
+  intrinsics: [436.65111454554625, 435.15726627794936, 426.3181418502217, 240.606365806057]
+  resolution: [848, 480]
+  rostopic: /d455/infra1/image_rect_raw
+  timeshift_cam_imu: -0.010442546985506812
+cam1:
+  T_cam_imu:
+    - [1.0, 0.0, 0.0, -0.060]
+    - [0.0, 1.0, 0.0, 0.0]
+    - [0.0, 0.0, 1.0, 0.0]
+    - [0.0, 0.0, 0.0, 1.0]
+
+  T_cn_cnm1:
+    - [0.0, 0.0, 0.0, -0.095]
+    - [0.0, 1.0, 0.0, 0.0]
+    - [0.0, 0.0, 1.0, 0.0]
+    - [0.0, 0.0, 0.0, 1.0]
+  cam_overlaps: [0]
+  camera_model: pinhole
+  distortion_coeffs: [0.0, 0.0, 0.0, 0.0]
+  distortion_model: radtan
+  intrinsics: [436.03257344134397, 434.43906610138, 425.3931798347179, 240.53075286288163]
+  resolution: [848, 480]
+  rostopic: /d455/infra2/image_rect_raw
+  timeshift_cam_imu: -0.010458173498478777
+
