@@ -1,0 +1,9 @@
+<launch>
+  <!-- Define the static transform between global and mocap -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_1" args="0 0 0 3.1415 0 0 mocap global"/>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_2" args="0 0 0 1.5708 1.5708 3.1415 imu drone_link"/>
+
+  <!-- Launch the odom_transform_node -->
+  <node pkg="ov_tools" type="odom_transform" name="odom_transform" output="screen"/>
+</launch>
