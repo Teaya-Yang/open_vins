@@ -22,7 +22,7 @@ The /tf tree should provide the map->odom->d455_link transformation and we assum
 #define DRONE_FRAME_ID          "drone_link"
 
 #define ODOM_SUB_TOPIC          "/ov_msckf/odomimu"
-#define ODOM_PUB_TOPIC          "/odom_new"
+#define ODOM_PUB_TOPIC          "/odom_data"
 
 // global variables
 tf2::Vector3 displacement_vec_in_odomchild; // "arm"/displacement/position offset vector pointing from drone to odomchild, represent in odomchild frame
