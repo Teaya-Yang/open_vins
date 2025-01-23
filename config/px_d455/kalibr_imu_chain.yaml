@@ -1,0 +1,71 @@
+%YAML:1.0
+
+# # Name: static / dynamic calib
+imu0:
+  T_i_b:
+    - [1.0, 0.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0, 0.0]
+    - [0.0, 0.0, 1.0, 0.0]
+    - [0.0, 0.0, 0.0, 1.0]
+  # Values from allan plots
+  # https://github.com/rpng/ar_table_dataset
+  #accelerometer_noise_density: 0.0010382453726199955
+  #accelerometer_random_walk: 4.132785219723178e-05
+  #gyroscope_noise_density: 0.00010272083263292572
+  #gyroscope_random_walk: 1.1106223553679963e-06
+  # Inflated values (to account for unmodelled effects)
+  #  - white noise multiplied by 2
+  #  - bias random walk multiplied by 10
+
+  # Below are from Xiangyu's launch file:
+  # accelerometer_noise_density: 1.8515094551549899e-02
+  # accelerometer_random_walk: 4.7394049851801258e-04
+  # gyroscope_noise_density: 2.3872698052960000e-03
+  # gyroscope_random_walk: 1.3424377530285312e-05
+
+  # Inflated based on measurements
+
+  # White noise (x5)
+  accelerometer_noise_density: 0.00721163865
+  gyroscope_noise_density: 0.00052737924
+
+  # Random walk (x10)
+  accelerometer_random_walk: 0.0012039146975863108 
+  gyroscope_random_walk: 8.66855547998756e-05
+
+  rostopic: '/imu_data113' 
+  update_rate: 487 
+
+  # three different modes supported:
+  # "calibrated" (same as "kalibr"), "kalibr", "rpng"
+  model: "kalibr"
+  # how to get from Kalibr imu.yaml result file:
+  #   - Tw is imu0:gyroscopes:M:
+  #   - R_IMUtoGYRO: is imu0:gyroscopes:C_gyro_i:
+  #   - Ta is imu0:accelerometers:M:
+  #   - R_IMUtoACC not used by Kalibr
+  #   - Tg is imu0:gyroscopes:A:
+  # M for gyro
+  Tw:
+    - [0.9963600984249709, 0.0, 0.0]
+    - [-0.0011840481963993035, 0.995575393600695, 0.0]
+    - [-0.00248648706441851, 0.004631073354737291, 1.0028127235663626]
+  # C_gyro_i
+  R_IMUtoGYRO:
+    - [0.9999929681753691, -0.0006114872609970259, -0.003699957181514732]
+    - [0.000596705142796857, 0.9999918419293484, -0.003994999089086839]
+    - [0.003702369888053308, 0.003992763213475506, 0.999985175039677]
+  # M for accelerometer
+  Ta:
+    - [0.9994251075758054, 0.0, 0.0]
+    - [-0.0007345017884919557, 1.001632363590542, 0.0]
+    - [0.0033766335170973332, 0.002002570963182193, 0.9962549326232304]
+  R_IMUtoACC:
+    - [ 1.0, 0.0, 0.0 ]
+    - [ 0.0, 1.0, 0.0 ]
+    - [ 0.0, 0.0, 1.0 ]
+  Tg:
+    - [5.666604528419033e-05, -0.0005804666135528855, 0.00011740874995487382]
+    - [0.00016850431144562565, 1.3150640603863258e-05, -0.002851323514774525]
+    - [3.894355972003992e-05, 0.0015549529903953487, 0.0007926169384483441]
+
