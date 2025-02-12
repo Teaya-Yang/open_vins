@@ -4,7 +4,7 @@
   <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_1" args="0 0 0 0 0 0 mocap global"/> -->
 
   <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_2" args="0 0 0 1.5708 1.5708 3.1415 imu drone_link"/> -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_2" args="0 0 0 -1.5708 1.5708 0 imu drone_link"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_2" args="0 0 0 0 0 0 imu drone_link"/>
   
   <!-- <node pkg="tf" type="static_transform_publisher" name="tf_imu_d455_link"
             args="-0.03 0.007 0.016 0 -1.570796 1.570796 imu d455_link 100"/> -->
