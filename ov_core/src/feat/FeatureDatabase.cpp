@@ -84,6 +84,20 @@ void FeatureDatabase::update_feature(size_t id, double timestamp, size_t cam_id,
   features_idlookup[id] = feat;
 }
 
+void FeatureDatabase::update_feature_descriptor(size_t id, size_t cam_id, cv::Mat descriptor){
+  // Find this feature using the ID lookup
+  if (features_idlookup.find(id) == features_idlookup.end()) {
+    PRINT_ERROR("Tried to update descriptor for non-existent feature ID %zu\n", id);
+    return;
+  }
+  std::lock_guard<std::mutex> lck(mtx);
+  // Get our feature
+  std::shared_ptr<Feature> feat = features_idlookup.at(id);
+  // Append this new information to it!
+  feat->descriptors[cam_id].push_back(descriptor.clone());
+  return;
+}
+
 std::vector<std::shared_ptr<Feature>> FeatureDatabase::features_not_containing_newer(double timestamp, bool remove, bool skip_deleted) {
 
   // Our vector of features that do not have measurements after the specified time

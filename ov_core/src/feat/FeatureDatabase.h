@@ -27,6 +27,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+#include <opencv2/core.hpp>
 
 namespace ov_core {
 
@@ -75,6 +76,18 @@ public:
    */
   bool get_feature_clone(size_t id, Feature &feat);
 
+  /**
+   * @brief Update the descriptor associated with a feature
+   * @param id ID of the feature we will update
+   * @param cam_id Which camera this descriptor came from
+   * @param descriptor The ORB descriptor (CV_8U, row vector) to associate with this feature
+   *
+   * This function appends the provided descriptor to the list of descriptors stored for the
+   * specified feature and camera. If the feature ID does not exist, the function prints an error.
+   * The descriptor is cloned before being stored to ensure memory safety.
+  */
+
+ void update_feature_descriptor(size_t id, size_t cam_id, cv::Mat descriptor);
   /**
    * @brief Update a feature object
    * @param id ID of the feature we will update

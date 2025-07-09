@@ -203,6 +203,7 @@ void VioManager::retriangulate_active_tracks(const ov_core::CameraData &message)
   }
   active_tracks_posinG.clear();
   active_tracks_uvd.clear();
+  active_tracks_descriptors.clear(); //clear old descriptors as well
 
   // Current active tracks in our frontend
   // TODO: should probably assert here that these are at the message time...
@@ -376,6 +377,19 @@ void VioManager::retriangulate_active_tracks(const ov_core::CameraData &message)
     Eigen::Vector3d uvd;
     uvd << uv_dist, depth;
     active_tracks_uvd.insert({feat.first, uvd});
+
+    // If descriptor exists, also update descriptors!
+    size_t featid = feat.first;
+    std::shared_ptr<FeatureDatabase> db = trackFEATS->get_feature_database();
+    std::shared_ptr<Feature> ftr = db->get_feature(featid);
+    if (ftr && ftr->descriptors.find(0) != ftr->descriptors.end()) {
+        const auto& desc_list = ftr->descriptors.at(0);
+        if (!desc_list.empty()) {
+            active_tracks_descriptors[featid] = desc_list.back();
+        }
+    }
+
+
   }
   retri_rT3 = boost::posix_time::microsec_clock::local_time();
 

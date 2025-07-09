@@ -321,6 +321,10 @@ void TrackDescriptor::feed_stereo(const CameraData &message, size_t msg_id_left,
                              npt_l.y);
     database->update_feature(good_ids_left.at(i), message.timestamp, cam_id_right, good_right.at(i).pt.x, good_right.at(i).pt.y, npt_r.x,
                              npt_r.y);
+    // We want to change these to also include good_desc_left and good_desc_right...
+    // No need to pass in other things since the feature must already exists 
+    database->update_feature_descriptor(good_ids_left.at(i), cam_id_left, good_desc_left.row((int) i)); // or something like this
+    database->update_feature_descriptor(good_ids_left.at(i), cam_id_right, good_desc_right.row((int) i));
   }
 
   // Debug info

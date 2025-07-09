@@ -837,8 +837,9 @@ void ROS2Visualizer::publish_loopclosure_information() {
   double active_tracks_time2 = -1;
   std::unordered_map<size_t, Eigen::Vector3d> active_tracks_posinG;
   std::unordered_map<size_t, Eigen::Vector3d> active_tracks_uvd;
+  std::unordered_map<size_t, cv::Mat> active_tracks_descriptors;
   cv::Mat active_cam0_image;
-  _app->get_active_tracks(active_tracks_time1, active_tracks_posinG, active_tracks_uvd);
+  _app->get_active_tracks(active_tracks_time1, active_tracks_posinG, active_tracks_uvd, active_tracks_descriptors);
   _app->get_active_image(active_tracks_time2, active_cam0_image);
   if (active_tracks_time1 == -1)
     return;

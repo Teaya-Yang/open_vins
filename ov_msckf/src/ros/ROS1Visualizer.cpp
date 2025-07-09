@@ -74,7 +74,7 @@ ROS1Visualizer::ROS1Visualizer(std::shared_ptr<ros::NodeHandle> nh, std::shared_
 
   // Loop closure publishers
   pub_loop_pose = nh->advertise<nav_msgs::Odometry>("loop_pose", 2);
-  pub_loop_point = nh->advertise<sensor_msgs::PointCloud>("loop_feats", 2);
+  pub_loop_point = nh->advertise<sensor_msgs::PointCloud2>("loop_feats", 2);
   pub_loop_extrinsic = nh->advertise<nav_msgs::Odometry>("loop_extrinsic", 2);
   pub_loop_intrinsics = nh->advertise<sensor_msgs::CameraInfo>("loop_intrinsics", 2);
   it_pub_loop_img_depth = it.advertise("loop_depth", 2);
@@ -844,15 +844,22 @@ void ROS1Visualizer::publish_loopclosure_information() {
   double active_tracks_time2 = -1;
   std::unordered_map<size_t, Eigen::Vector3d> active_tracks_posinG;
   std::unordered_map<size_t, Eigen::Vector3d> active_tracks_uvd;
+  std::unordered_map<size_t, cv::Mat> active_tracks_descriptors;
   cv::Mat active_cam0_image;
-  _app->get_active_tracks(active_tracks_time1, active_tracks_posinG, active_tracks_uvd);
+
+  // get current frame and feature tracks in frame
+  _app->get_active_tracks(active_tracks_time1, active_tracks_posinG, active_tracks_uvd, active_tracks_descriptors);
   _app->get_active_image(active_tracks_time2, active_cam0_image);
+  // Ensure active tracks available
   if (active_tracks_time1 == -1)
     return;
+  // Ensure pose available
   if (_app->get_state()->_clones_IMU.find(active_tracks_time1) == _app->get_state()->_clones_IMU.end())
     return;
+  // State at active time
   Eigen::Vector4d quat = _app->get_state()->_clones_IMU.at(active_tracks_time1)->quat();
   Eigen::Vector3d pos = _app->get_state()->_clones_IMU.at(active_tracks_time1)->pos();
+  // Ensure image and feature tracks are in sync
   if (active_tracks_time1 != active_tracks_time2)
     return;
 
@@ -909,40 +916,108 @@ void ROS1Visualizer::publish_loopclosure_information() {
   //======================================================
   // PUBLISH FEATURE TRACKS IN THE GLOBAL FRAME OF REFERENCE
   if (pub_loop_point.getNumSubscribers() != 0) {
-
-    // Construct the message
-    sensor_msgs::PointCloud point_cloud;
-    point_cloud.header = header;
-    point_cloud.header.frame_id = "global";
-    for (const auto &feattimes : active_tracks_posinG) {
-
-      // Get this feature information
+    sensor_msgs::PointCloud2 cloud_msg;
+    cloud_msg.header = header;
+    cloud_msg.header.frame_id = "global";
+  
+    const int descriptor_len = 32;
+    const int point_step = sizeof(float) * 6 + sizeof(uint32_t) + descriptor_len;  // x,y,z,u,v,d,featid + descriptor
+  
+    cloud_msg.height = 1;
+    cloud_msg.width = active_tracks_posinG.size();
+    cloud_msg.is_dense = false;
+    cloud_msg.is_bigendian = false;
+    cloud_msg.point_step = point_step;
+    cloud_msg.row_step = cloud_msg.point_step * cloud_msg.width;
+    cloud_msg.data.resize(cloud_msg.row_step);
+  
+    cloud_msg.fields.resize(8);
+    int offset = 0;
+  
+    cloud_msg.fields[0].name = "x";
+    cloud_msg.fields[0].offset = offset;
+    cloud_msg.fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+    cloud_msg.fields[0].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[1].name = "y";
+    cloud_msg.fields[1].offset = offset;
+    cloud_msg.fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+    cloud_msg.fields[1].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[2].name = "z";
+    cloud_msg.fields[2].offset = offset;
+    cloud_msg.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+    cloud_msg.fields[2].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[3].name = "u";
+    cloud_msg.fields[3].offset = offset;
+    cloud_msg.fields[3].datatype = sensor_msgs::PointField::FLOAT32;
+    cloud_msg.fields[3].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[4].name = "v";
+    cloud_msg.fields[4].offset = offset;
+    cloud_msg.fields[4].datatype = sensor_msgs::PointField::FLOAT32;
+    cloud_msg.fields[4].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[5].name = "d";
+    cloud_msg.fields[5].offset = offset;
+    cloud_msg.fields[5].datatype = sensor_msgs::PointField::FLOAT32;
+    cloud_msg.fields[5].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[6].name = "featid";
+    cloud_msg.fields[6].offset = offset;
+    cloud_msg.fields[6].datatype = sensor_msgs::PointField::UINT32;
+    cloud_msg.fields[6].count = 1;
+    offset += 4;
+  
+    cloud_msg.fields[7].name = "descriptor";
+    cloud_msg.fields[7].offset = offset;
+    cloud_msg.fields[7].datatype = sensor_msgs::PointField::UINT8;
+    cloud_msg.fields[7].count = descriptor_len;
+  
+    // Fill data
+    uint8_t* ptr = cloud_msg.data.data();
+    for (const auto& feattimes : active_tracks_posinG) {
       size_t featid = feattimes.first;
+      const Eigen::Vector3d& pFinG = feattimes.second;
+  
       Eigen::Vector3d uvd = Eigen::Vector3d::Zero();
-      if (active_tracks_uvd.find(featid) != active_tracks_uvd.end()) {
+      if (active_tracks_uvd.count(featid)) {
         uvd = active_tracks_uvd.at(featid);
       }
-      Eigen::Vector3d pFinG = active_tracks_posinG.at(featid);
-
-      // Push back 3d point
-      geometry_msgs::Point32 p;
-      p.x = pFinG(0);
-      p.y = pFinG(1);
-      p.z = pFinG(2);
-      point_cloud.points.push_back(p);
-
-      // Push back the uv_norm, uv_raw, and feature id
-      // NOTE: we don't use the normalized coordinates to save time here
-      // NOTE: they will have to be re-normalized in the loop closure code
-      sensor_msgs::ChannelFloat32 p_2d;
-      p_2d.values.push_back(0);
-      p_2d.values.push_back(0);
-      p_2d.values.push_back(uvd(0));
-      p_2d.values.push_back(uvd(1));
-      p_2d.values.push_back(featid);
-      point_cloud.channels.push_back(p_2d);
+  
+      // Write float x, y, z, u, v, d
+      float* f_ptr = reinterpret_cast<float*>(ptr);
+      f_ptr[0] = static_cast<float>(pFinG.x());
+      f_ptr[1] = static_cast<float>(pFinG.y());
+      f_ptr[2] = static_cast<float>(pFinG.z());
+      f_ptr[3] = static_cast<float>(uvd(0));
+      f_ptr[4] = static_cast<float>(uvd(1));
+      f_ptr[5] = static_cast<float>(uvd(2));
+  
+      // Write featid
+      *reinterpret_cast<uint32_t*>(ptr + 6 * sizeof(float)) = static_cast<uint32_t>(featid);
+  
+      // Write descriptor (initialize with zeros just in case)
+      uint8_t* desc_ptr = ptr + 6 * sizeof(float) + sizeof(uint32_t);
+      std::fill(desc_ptr, desc_ptr + descriptor_len, 0);
+      if (active_tracks_descriptors.count(featid)) {
+        const cv::Mat& desc = active_tracks_descriptors.at(featid);
+        for (int i = 0; i < descriptor_len; ++i) {
+          desc_ptr[i] = desc.at<uchar>(0, i);
+        }
+      }
+  
+      ptr += point_step;
     }
-    pub_loop_point.publish(point_cloud);
+  
+    pub_loop_point.publish(cloud_msg);
   }
 
   //======================================================

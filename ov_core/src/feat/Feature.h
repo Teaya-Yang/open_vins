@@ -26,6 +26,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <opencv2/core.hpp>
+
 
 namespace ov_core {
 
@@ -44,6 +46,9 @@ public:
 
   /// If this feature should be deleted
   bool to_delete;
+
+  // Descriptors used by ORB tracking
+  std::unordered_map<size_t, std::vector<cv::Mat>> descriptors;
 
   /// UV coordinates that this feature has been seen from (mapped by camera ID)
   std::unordered_map<size_t, std::vector<Eigen::VectorXf>> uvs;

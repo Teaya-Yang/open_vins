@@ -130,10 +130,12 @@ public:
 
   /// Returns active tracked features in the current frame
   void get_active_tracks(double &timestamp, std::unordered_map<size_t, Eigen::Vector3d> &feat_posinG,
-                         std::unordered_map<size_t, Eigen::Vector3d> &feat_tracks_uvd) {
+                         std::unordered_map<size_t, Eigen::Vector3d> &feat_tracks_uvd, 
+                         std::unordered_map<size_t, cv::Mat> &feat_descriptors) {
     timestamp = active_tracks_time;
     feat_posinG = active_tracks_posinG;
     feat_tracks_uvd = active_tracks_uvd;
+    feat_descriptors = active_tracks_descriptors;
   }
 
 protected:
@@ -237,6 +239,7 @@ protected:
   double active_tracks_time = -1;
   std::unordered_map<size_t, Eigen::Vector3d> active_tracks_posinG;
   std::unordered_map<size_t, Eigen::Vector3d> active_tracks_uvd;
+  std::unordered_map<size_t, cv::Mat> active_tracks_descriptors; // Add list for descriptors
   cv::Mat active_image;
   std::map<size_t, Eigen::Matrix3d> active_feat_linsys_A;
   std::map<size_t, Eigen::Vector3d> active_feat_linsys_b;
