@@ -78,13 +78,13 @@ filepath_gt: "/tmp/ov_groundtruth.txt"
 
 # our front-end feature tracking parameters
 # we have a KLT and descriptor based (KLT is better implemented...)
-use_klt: true # if true we will use KLT, otherwise use a ORB descriptor + robust matching
+use_klt: false # if true we will use KLT, otherwise use a ORB descriptor + robust matching
 num_pts: 400 # number of points (per camera) we will extract and try to track
 fast_threshold: 30 # threshold for fast extraction (warning: lower threshs can be expensive)
 grid_x: 5 # extraction sub-grid count for horizontal direction (uniform tracking)
 grid_y: 5 # extraction sub-grid count for vertical direction (uniform tracking)
 min_px_dist: 15 # distance between features (features near each other provide less information)
-knn_ratio: 0.70 # descriptor knn threshold for the top two descriptor matches
+knn_ratio: 0.90 # descriptor knn threshold for the top two descriptor matches
 track_frequency: 30.0 # frequency we will perform feature tracking at (in frames per second / hertz)
 downsample_cameras: false # will downsample image in half if true
 num_opencv_threads: 4 # -1: auto, 0-1: serial, >1: number of threads
